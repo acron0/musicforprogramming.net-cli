@@ -47,7 +47,7 @@ play() {
 usage() {
     echo "usage: progmusic [-mb]
         -m show episode menu
-        -b run in background"
+        -d run in background"
 }
 
 show_menu() {
@@ -80,10 +80,10 @@ assert_in_path() {
 # -- initialize ----------------------------------------------------------------
 assert_in_path mpg123 && assert_in_path wget
 
-while getopts "mb" opt
+while getopts "md" opt
 do
     case $opt in
-	b) bg=true ;;
+	d) bg=true ;;
         m) menu=true ;;
         *) usage && exit 1 ;;
     esac
