@@ -6,26 +6,48 @@ set -o nounset
 host="musicforprogramming.net"
 content_host="datashat.net"
 menu=false
+bg=false
+pipe_path="/tmp/progmusicpipe"
+
+# -- pipe required to workaround no https in mpg123 ----------------------------
+
+mkfifo $pipe_path
 
 # -- functions -----------------------------------------------------------------
-get_djs() {
-    wget -q -O - "http://$host/" 2> /dev/null | \
-    grep -oE "(\?[a-z]+\">[0-9]+: [0-9a-zA-Z_+ ]+)|(\"selected\">[0-9]+: [0-9a-zA-Z_+ ]+)" | \
-        grep -oE "[0-9]+: [0-9a-zA-Z_+ ]+" | \
-        awk -F': ' '{print $2}'
+
+function cleanup {
+    rm  -r $pipe_path
 }
+trap cleanup EXIT
+
+get_djs() {
+    wget -q -O - "http://$host/latest" 2> /dev/null \
+	| grep -oE "([0-9]+:\s[^\<\"]+)" \
+	| sort \
+	| uniq
+}
+
+# 	
 
 play() {
     green="\033[1;32m"
-    echo -e "$green-->$normal playing episode $1 by $2"
-    dj=$(tr ' ' '_' <<< "$2" | tr '[A-Z]' '[a-z]' | sed 's/+/and/g')
-    filename="music_for_programming_$1-$dj.mp3"
-    mpg123 -q "http://$content_host/$filename" > /dev/null 2>&1 &
+    dj=$(echo $2 | grep -oE "[^0-9: ].+")
+    echo -e "$green-->$normal playing episode $1 by $dj"
+    filepart=$(tr ' ' '_' <<< "$dj" | tr '[A-Z]' '[a-z]' | sed 's/+/and/g' | sed 's/\./_/g' | sed 's/__/_/g')
+    filename="music_for_programming_$1-$filepart.mp3"
+    url="https://$content_host/$filename"
+    if [[ "$bg" == "true" ]]
+    then
+	(curl -sL $url -o pipe & mpg123 pipe > /dev/null 2>&1) &
+    else
+	curl -sL $url -o pipe & mpg123 pipe > /dev/null 2>&1
+    fi
 }
 
 usage() {
-    echo "usage: progmusic [-m]
-        -m show episode menu"
+    echo "usage: progmusic [-mb]
+        -m show episode menu
+        -b run in background"
 }
 
 show_menu() {
@@ -58,9 +80,10 @@ assert_in_path() {
 # -- initialize ----------------------------------------------------------------
 assert_in_path mpg123 && assert_in_path wget
 
-while getopts "m" opt
+while getopts "mb" opt
 do
     case $opt in
+	b) bg=true ;;
         m) menu=true ;;
         *) usage && exit 1 ;;
     esac
