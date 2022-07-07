@@ -31,7 +31,7 @@ get_djs() {
 
 play() {
     green="\033[1;32m"
-    dj=$(echo $2 | grep -oE "[^0-9: ].+")
+    dj=$(echo $2 | grep -oE ':\s(.+)$' | cut -c3-)
     echo -e "$green-->$normal playing episode $1 by $dj"
     filepart=$(tr ' ' '_' <<< "$dj" | tr '[A-Z]' '[a-z]' | sed 's/+/and/g' | sed 's/\./_/g' | sed 's/__/_/g')
     filename="music_for_programming_$1-$filepart.mp3"
