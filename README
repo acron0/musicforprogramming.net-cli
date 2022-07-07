@@ -4,8 +4,9 @@ Convenient when you want music for programming without launching a browser (or h
 
 Needs: bash, wget, mpg123
 
-Backgrounds mpg123, so to stop it you need to kill the mpg123 process.
-
 Usage:
-./progmusic     - plays a random episode
-./progmusic -m  - let's you choose from a menu of available episodes
+./progmusic [-mb]
+
+  <no flag> - plays a random episode
+  -m        - let's you choose from a menu of available episodes
+  -b        - backgrounds mpg123, so to stop it you need to kill the mpg123 process
