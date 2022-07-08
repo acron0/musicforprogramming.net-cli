@@ -9,4 +9,4 @@ Usage:
 
   <no flag> - plays a random episode
   -m        - let's you choose from a menu of available episodes
-  -b        - backgrounds mpg123, so to stop it you need to kill the mpg123 process
+  -d        - backgrounds mpg123, so to stop it you need to kill the mpg123 process
